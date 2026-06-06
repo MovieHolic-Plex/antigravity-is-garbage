@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { validateOutputPath } from '../shared/output-policy.js';
 
@@ -14,6 +14,11 @@ export class GuardedWriter {
 
   async writeBuffer(relativePath, content) {
     return this.#write(relativePath, content);
+  }
+
+  async clearOutputs() {
+    await rm(path.resolve(this.projectRoot, 'outputs'), { recursive: true, force: true });
+    this.blockedActions = [];
   }
 
   async #write(relativePath, content) {

@@ -56,4 +56,25 @@ describe('createMockupSet', () => {
       'extension_not_allowed'
     );
   });
+
+  it('clears stale output files before writing a new mockup set', async () => {
+    const writer = new GuardedWriter(projectRoot);
+
+    await createMockupSet({
+      writer,
+      prompt: 'first run',
+      agyMarkdown: '## Visual Direction\nFirst run',
+      variants: 3
+    });
+
+    await createMockupSet({
+      writer,
+      prompt: 'second run',
+      agyMarkdown: '## Visual Direction\nSecond run',
+      variants: 1
+    });
+
+    const outputFiles = await readdir(path.join(projectRoot, 'outputs'));
+    expect(outputFiles.sort()).toEqual(['final-report.md', 'planning-brief.md', 'variant-1.png']);
+  });
 });

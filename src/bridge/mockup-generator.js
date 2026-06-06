@@ -11,6 +11,8 @@ export async function createMockupSet({ writer, prompt, agyMarkdown, variants = 
   const normalizedScreenCount = Math.max(1, Math.min(6, Number(screenCount) || 1));
   const files = [];
 
+  await writer.clearOutputs();
+
   files.push(
     await writer.writeText(
       'outputs/planning-brief.md',
