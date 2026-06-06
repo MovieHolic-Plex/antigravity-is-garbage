@@ -22,6 +22,7 @@ describe('createMockupSet', () => {
     const result = await createMockupSet({
       writer,
       prompt: 'A polished dashboard for a small coffee subscription business',
+      agyMarkdown: '## Visual Direction\nAgy says to use editorial cards and focused image hierarchy.',
       variants: 3
     });
 
@@ -44,6 +45,7 @@ describe('createMockupSet', () => {
 
     const planning = await readFile(path.join(projectRoot, 'outputs/planning-brief.md'), 'utf8');
     expect(planning).toContain('A polished dashboard');
+    expect(planning).toContain('Agy says to use editorial cards');
     expect(planning).toContain('## Image Prompt');
   });
 

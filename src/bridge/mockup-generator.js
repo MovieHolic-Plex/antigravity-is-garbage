@@ -6,7 +6,7 @@ const PALETTES = [
   { background: [250, 250, 250], panel: [17, 24, 39], accent: [14, 165, 233] }
 ];
 
-export async function createMockupSet({ writer, prompt, variants = 3, screenCount = 1 }) {
+export async function createMockupSet({ writer, prompt, agyMarkdown, variants = 3, screenCount = 1 }) {
   const normalizedVariants = Math.max(1, Math.min(3, Number(variants) || 3));
   const normalizedScreenCount = Math.max(1, Math.min(6, Number(screenCount) || 1));
   const files = [];
@@ -14,7 +14,12 @@ export async function createMockupSet({ writer, prompt, variants = 3, screenCoun
   files.push(
     await writer.writeText(
       'outputs/planning-brief.md',
-      createPlanningBrief({ prompt, variants: normalizedVariants, screenCount: normalizedScreenCount })
+      createPlanningBrief({
+        prompt,
+        agyMarkdown,
+        variants: normalizedVariants,
+        screenCount: normalizedScreenCount
+      })
     )
   );
 
@@ -30,7 +35,12 @@ export async function createMockupSet({ writer, prompt, variants = 3, screenCoun
   files.push(
     await writer.writeText(
       'outputs/final-report.md',
-      createFinalReport({ prompt, variants: normalizedVariants, screenCount: normalizedScreenCount })
+      createFinalReport({
+        prompt,
+        agyMarkdown,
+        variants: normalizedVariants,
+        screenCount: normalizedScreenCount
+      })
     )
   );
 
@@ -40,7 +50,7 @@ export async function createMockupSet({ writer, prompt, variants = 3, screenCoun
   };
 }
 
-export function createPlanningBrief({ prompt, variants, screenCount }) {
+export function createPlanningBrief({ prompt, agyMarkdown, variants, screenCount }) {
   return `# Planning Brief
 
 ## User Prompt
@@ -59,10 +69,14 @@ ${prompt}
 Create polished product mockup imagery for: ${prompt}
 
 The output should communicate layout, visual hierarchy, color direction, and user intent without producing HTML, CSS, JavaScript, or app scaffold files.
+
+## Agy Planning Output
+
+${agyMarkdown || 'No agy planning output was provided.'}
 `;
 }
 
-export function createFinalReport({ prompt, variants, screenCount }) {
+export function createFinalReport({ prompt, agyMarkdown, variants, screenCount }) {
   return `# Final Mockup Report
 
 ## Summary
@@ -82,6 +96,10 @@ ${Array.from({ length: variants }, (_, index) => `- Variant ${index + 1}: \`outp
 ## Guardrail
 
 This project is intentionally limited to Markdown and image outputs. Code files are not generated.
+
+## Agy Planning Source
+
+${agyMarkdown || 'No agy planning output was provided.'}
 `;
 }
 

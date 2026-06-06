@@ -5,6 +5,7 @@ import { WebSocket } from 'ws';
 import { GuardedWriter } from './guarded-writer.js';
 import { createMockupSet } from './mockup-generator.js';
 import { probeAntigravity } from './antigravity-probe.js';
+import { DEFAULT_AGY_PATH, runAgyPlanning } from './agy-client.js';
 
 const options = parseArgs(process.argv.slice(2));
 const server = options.server || process.env.AIGG_SERVER || 'ws://localhost:4173';
@@ -19,7 +20,7 @@ if (!pairing) {
 const socket = new WebSocket(`${server.replace(/\/$/, '')}/ws/bridge/${encodeURIComponent(pairing)}`);
 
 socket.on('open', async () => {
-  const antigravity = await probeAntigravity(options.antigravityPath);
+  const antigravity = await probeAntigravity(options.agyPath || options.antigravityPath);
   socket.send(JSON.stringify({ type: 'bridge_status', status: 'connected', projectRoot, antigravity }));
 });
 
@@ -28,11 +29,32 @@ socket.on('message', async (raw) => {
   if (message?.type !== 'generate') return;
 
   try {
-    socket.send(JSON.stringify({ type: 'progress', stage: 'planning', message: 'Writing planning Markdown' }));
+    socket.send(JSON.stringify({ type: 'progress', stage: 'agy', message: 'Asking agy for image-only planning' }));
+    const agy = await runAgyPlanning({
+      commandPath: options.agyPath || options.antigravityPath || DEFAULT_AGY_PATH,
+      userPrompt: message.prompt,
+      variants: message.variants || 3,
+      screenCount: message.screenCount || 1,
+      timeoutMs: Number(options.agyTimeoutMs || process.env.AIGG_AGY_TIMEOUT_MS || 60000)
+    });
+
+    if (!agy.ok) {
+      socket.send(
+        JSON.stringify({
+          type: 'error',
+          error: `agy_${agy.reason}`,
+          detail: agy.stderr || `Failed to get planning output from ${agy.commandPath}`
+        })
+      );
+      return;
+    }
+
+    socket.send(JSON.stringify({ type: 'progress', stage: 'planning', message: 'Writing agy planning Markdown' }));
     const writer = new GuardedWriter(projectRoot);
     const result = await createMockupSet({
       writer,
       prompt: message.prompt,
+      agyMarkdown: agy.markdown,
       variants: message.variants || 3,
       screenCount: message.screenCount || 1
     });
@@ -60,6 +82,8 @@ function parseArgs(args) {
     if (arg === '--pairing') parsed.pairing = args[index + 1];
     if (arg === '--project') parsed.project = args[index + 1];
     if (arg === '--antigravity-path') parsed.antigravityPath = args[index + 1];
+    if (arg === '--agy-path') parsed.agyPath = args[index + 1];
+    if (arg === '--agy-timeout-ms') parsed.agyTimeoutMs = args[index + 1];
   }
   return parsed;
 }

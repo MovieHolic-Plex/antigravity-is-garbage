@@ -94,7 +94,7 @@ function connectBrowserSocket(sessionId) {
       updateGenerateAvailability();
 
       if (message.antigravity) {
-        elements.progress.textContent = `Antigravity binary detected: ${message.antigravity.available ? 'yes' : 'no'}`;
+        elements.progress.textContent = `agy binary detected: ${message.antigravity.available ? 'yes' : 'no'}`;
       }
     }
 

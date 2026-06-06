@@ -47,6 +47,8 @@ Generated files are written under `outputs/`.
 npm test
 ```
 
-## Notes on Antigravity
+## Notes on agy / Antigravity
 
-The bridge probes `/usr/local/bin/antigravity` and reports whether it exists. In this environment Antigravity behaves like a GUI app, so the MVP keeps the generator deterministic and local while preserving the output boundary that an Antigravity adapter must obey.
+The bridge uses the Antigravity CLI at `/home/main/.local/bin/agy` in `--print` mode to create the planning Markdown. The CLI is invoked through a guarded bridge, and all project writes still go through the Markdown/image allowlist.
+
+The generated PNG variants are deterministic local placeholder images for the MVP. The important integration boundary is that agy can provide planning text, but it never receives permission to write project files directly.

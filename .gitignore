@@ -2,5 +2,6 @@ node_modules/
 dist/
 outputs/
 .superpowers/
+cache/
 .env
 *.log
