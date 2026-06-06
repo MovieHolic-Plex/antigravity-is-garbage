@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>antigravity-is-garbage</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">image-only mockup bridge</p>
+          <h1>antigravity-is-garbage</h1>
+        </div>
+        <div class="status" id="bridgeStatus">starting</div>
+      </section>
+
+      <section class="workspace">
+        <aside class="panel">
+          <h2>Invite Session</h2>
+          <dl class="facts">
+            <div>
+              <dt>Session</dt>
+              <dd id="sessionId">creating...</dd>
+            </div>
+            <div>
+              <dt>Pairing code</dt>
+              <dd id="pairingCode">...</dd>
+            </div>
+          </dl>
+
+          <label for="prompt">Prompt</label>
+          <textarea id="prompt" rows="8">A polished dashboard for a small coffee subscription business</textarea>
+
+          <div class="controls">
+            <label>
+              Variants
+              <input id="variants" type="number" min="1" max="3" value="3" />
+            </label>
+            <label>
+              Screens
+              <input id="screenCount" type="number" min="1" max="6" value="1" />
+            </label>
+          </div>
+
+          <button id="generateButton" type="button">Generate image mockups</button>
+
+          <div class="bridge-help">
+            <p>Run the bridge locally:</p>
+            <code id="bridgeCommand">npm run bridge -- --pairing ...</code>
+          </div>
+        </aside>
+
+        <section class="preview">
+          <div class="preview-header">
+            <h2>Variants</h2>
+            <span id="progress">Waiting for local bridge</span>
+          </div>
+          <div class="variant-grid" id="variantGrid"></div>
+          <section class="markdown">
+            <h2>Markdown Exports</h2>
+            <div id="markdownFiles"></div>
+          </section>
+          <section class="blocked">
+            <h2>Blocked Actions</h2>
+            <ul id="blockedActions"></ul>
+          </section>
+        </section>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
