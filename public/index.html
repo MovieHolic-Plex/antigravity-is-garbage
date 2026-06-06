@@ -7,33 +7,103 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <section class="topbar">
-        <div>
-          <p class="eyebrow">image-only mockup bridge</p>
+    <a class="skip-link" href="#prompt">Skip to prompt</a>
+    <main class="app-shell">
+      <header class="app-header">
+        <div class="brand-block">
+          <p class="eyebrow">image-only planning bridge</p>
           <h1>antigravity-is-garbage</h1>
+          <p class="headline-copy">Invite a friend, pair a local bridge, generate image mockup variants, and export the planning Markdown without letting the agent write code files.</p>
         </div>
-        <div class="status" id="bridgeStatus">starting</div>
-      </section>
+        <div class="header-actions" aria-live="polite">
+          <span class="status-pill" id="socketStatus">browser: connecting</span>
+          <span class="status-pill status-pill--muted" id="bridgeStatus">bridge: waiting</span>
+        </div>
+      </header>
+
+      <nav class="workflow-stepper" data-role="workflow-stepper" aria-label="Mockup workflow">
+        <ol>
+          <li class="workflow-step is-active">
+            <span class="step-index">1</span>
+            <span>
+              <strong>Create invite</strong>
+              <small>Session link and pairing code</small>
+            </span>
+          </li>
+          <li class="workflow-step" id="pairStep">
+            <span class="step-index">2</span>
+            <span>
+              <strong>Pair bridge</strong>
+              <small>Outbound local connection</small>
+            </span>
+          </li>
+          <li class="workflow-step" id="generateStep">
+            <span class="step-index">3</span>
+            <span>
+              <strong>Generate</strong>
+              <small>Image variants only</small>
+            </span>
+          </li>
+          <li class="workflow-step" id="exportStep">
+            <span class="step-index">4</span>
+            <span>
+              <strong>Export</strong>
+              <small>Planning and final Markdown</small>
+            </span>
+          </li>
+        </ol>
+      </nav>
 
       <section class="workspace">
-        <aside class="panel">
-          <h2>Invite Session</h2>
-          <dl class="facts">
-            <div>
-              <dt>Session</dt>
-              <dd id="sessionId">creating...</dd>
-            </div>
-            <div>
-              <dt>Pairing code</dt>
-              <dd id="pairingCode">...</dd>
-            </div>
-          </dl>
+        <aside class="session-panel" data-role="session-panel" aria-labelledby="sessionTitle">
+          <div class="panel-heading">
+            <p class="section-kicker">Live session</p>
+            <h2 id="sessionTitle">Invite and bridge</h2>
+          </div>
 
-          <label for="prompt">Prompt</label>
-          <textarea id="prompt" rows="8">A polished dashboard for a small coffee subscription business</textarea>
+          <div class="fact-stack">
+            <div class="fact-card">
+              <div>
+                <span class="fact-label">Invite URL</span>
+                <code id="inviteUrl">creating...</code>
+              </div>
+              <button class="copy-button" id="copyInviteButton" type="button">Copy</button>
+            </div>
+            <div class="fact-card">
+              <div>
+                <span class="fact-label">Pairing code</span>
+                <code id="pairingCode">...</code>
+              </div>
+            </div>
+            <div class="fact-card">
+              <div>
+                <span class="fact-label">Bridge command</span>
+                <code id="bridgeCommand">npm run bridge -- --pairing ...</code>
+              </div>
+              <button class="copy-button" id="copyBridgeButton" type="button">Copy</button>
+            </div>
+          </div>
 
-          <div class="controls">
+          <div class="policy-box">
+            <h3>Output policy</h3>
+            <ul>
+              <li>Allowed: Markdown and image files</li>
+              <li>Blocked: HTML, CSS, JS, package files</li>
+              <li>Storage: project <code>outputs/</code> only</li>
+            </ul>
+          </div>
+        </aside>
+
+        <section class="prompt-composer" data-role="prompt-composer" aria-labelledby="composerTitle">
+          <div class="panel-heading">
+            <p class="section-kicker">Create</p>
+            <h2 id="composerTitle">Describe the image mockup</h2>
+          </div>
+
+          <label class="prompt-label" for="prompt">Prompt</label>
+          <textarea id="prompt" rows="10">A polished dashboard for a small coffee subscription business</textarea>
+
+          <div class="field-row">
             <label>
               Variants
               <input id="variants" type="number" min="1" max="3" value="3" />
@@ -44,27 +114,52 @@
             </label>
           </div>
 
-          <button id="generateButton" type="button">Generate image mockups</button>
+          <button class="primary-action" id="generateButton" type="button" disabled>
+            Generate image mockups
+          </button>
+          <p class="helper-text" id="generateHint">Pair the local bridge before generating.</p>
 
-          <div class="bridge-help">
-            <p>Run the bridge locally:</p>
-            <code id="bridgeCommand">npm run bridge -- --pairing ...</code>
-          </div>
-        </aside>
-
-        <section class="preview">
-          <div class="preview-header">
-            <h2>Variants</h2>
+          <div class="progress-feed" aria-live="polite">
+            <span class="progress-dot" aria-hidden="true"></span>
             <span id="progress">Waiting for local bridge</span>
           </div>
+        </section>
+
+        <section class="results-panel" data-role="mockup-results" aria-labelledby="resultsTitle">
+          <div class="panel-heading panel-heading--row">
+            <div>
+              <p class="section-kicker">Preview</p>
+              <h2 id="resultsTitle">Image variants</h2>
+            </div>
+            <span class="result-count" id="resultCount">0 files</span>
+          </div>
+
+          <div class="empty-state" id="emptyVariants">
+            <div class="empty-visual" aria-hidden="true"></div>
+            <h3>No image variants yet</h3>
+            <p>Generated PNG mockups will appear here as selectable visual directions.</p>
+          </div>
           <div class="variant-grid" id="variantGrid"></div>
-          <section class="markdown">
-            <h2>Markdown Exports</h2>
-            <div id="markdownFiles"></div>
+
+          <section class="export-panel" data-role="export-panel" aria-labelledby="exportTitle">
+            <div class="panel-heading panel-heading--row">
+              <div>
+                <p class="section-kicker">Exports</p>
+                <h2 id="exportTitle">Markdown files</h2>
+              </div>
+            </div>
+            <div class="empty-state empty-state--compact" id="emptyMarkdown">
+              <h3>Markdown exports will appear after generation</h3>
+              <p>Planning brief and final report stay visible for review and download.</p>
+            </div>
+            <div class="markdown-list" id="markdownFiles"></div>
           </section>
-          <section class="blocked">
-            <h2>Blocked Actions</h2>
-            <ul id="blockedActions"></ul>
+
+          <section class="blocked-panel" aria-labelledby="blockedTitle">
+            <h2 id="blockedTitle">Blocked actions</h2>
+            <ul id="blockedActions">
+              <li class="muted-item">No blocked writes in this session.</li>
+            </ul>
           </section>
         </section>
       </section>
